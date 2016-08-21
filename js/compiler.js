@@ -58,15 +58,18 @@ const Senva = (new (function() {
       let char = script[i], isLetter /* is the character a letter ? */;
 
       // If the character is not a known symbol
-      if(!"%.+-*/<>'`#?!;$^:,~0123456789".includes(char) && !(isLetter = char.match(/[a-zA-Z ]/)))
+      if(!".+-*/<>'`#?!;$^:,~0123456789=&%".includes(char) && !(isLetter = char.match(/[a-zA-Z ]/)))
         return error(`Unknown symbol ${char}`);
 
       // Do actions depending on the char...
       // If the buffer is not empty but is not an integer and the operation
       // is not character displaying
       let int_buff = parseInt(buff);
-      if(buff.length && !isLetter && !'0123456789,'.includes(char) && (Number.isNaN(int_buff) || Math.floor(int_buff) !== parseFloat(buff) || int_buff < 0))
+
+      if(buff.length && !isLetter && !'0123456789,'.includes(char) && (Number.isNaN(int_buff) || Math.floor(int_buff) !== parseFloat(buff) || int_buff < 0)) {
+        i -= buff.length;
         return error('Bad value specified');
+      }
 
       // If that's a char
       if(isLetter) {
@@ -97,7 +100,7 @@ const Senva = (new (function() {
             break;
 
           // Reset the memory
-          case '%':
+          case '=':
             mem = [];
             m   = 0;
             break;
@@ -293,6 +296,34 @@ const Senva = (new (function() {
 
             // Do the conversion
             mem[m] = buff.charCodeAt(0);
+            break;
+
+          // Assign the same value to all memory's cells
+          case '&':
+            // If no buffer was specified...
+            if(!buff.length)
+              // Use '0' as the default value
+              buff = '0';
+
+            // Parse the buffer
+            let parsed = parseInt(buff);
+
+            // For each cell in the memory...
+            for(let i = 0; i < mem.length; i++)
+              // Assign the value to the cell
+              mem[i] = parsed;
+
+            break;
+
+          // Generate a random value
+          case '%':
+            // If no buffer was specified...
+            if(!buff.length)
+              // Use '255' as the default value
+              buff = '255';
+
+            // Store the random-generated number into the memory
+            mem[m] = Math.floor(Math.random() * (parseInt(buff) + 1));
             break;
         }
 

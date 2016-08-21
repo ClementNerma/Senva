@@ -55,7 +55,9 @@ Operation  | Default * | Description
     :      |     -     | Display the cell as a number
     ,      |     /     | Convert the string in the buffer to ASCII code
     ~      |     -     | Display the cell as a string (ASCII code)
-    %      |     -     | Reset the memory
+    =      |     -     | Reset the memory
+    &      |     0     | Assign a number to the entire memory
+    %      |    255    | Generate a random number between 0 and the value
 
 **NOTE :** If the default value is '/' that means you need to specify a buffer, '-' means that no buffer is needed. The default value is the value taken if you DO NOT specify a buffer.
 
