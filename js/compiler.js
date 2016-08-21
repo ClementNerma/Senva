@@ -41,6 +41,12 @@ const Senva = (new (function() {
         opened , // The number of opened conditions/loops
         started; // The start hour
 
+    // The moment when the prompt started
+    // This variable permit to don't take the time passed during the input in
+    // consideration
+    /** @type {number} */
+    let prompt_start;
+
     // Initialize the memory
     mem     = [0];
     m       = 0 ;
@@ -58,7 +64,7 @@ const Senva = (new (function() {
       let char = script[i], isLetter /* is the character a letter ? */;
 
       // If the character is not a known symbol
-      if(!".+-*/<>'`#?!;$^:,~0123456789=&%".includes(char) && !(isLetter = char.match(/[a-zA-Z ]/)))
+      if(!".+-*/<>'`#?!;$:,~0123456789=&%_()@".includes(char) && !(isLetter = char.match(/[a-zA-Z ]/)))
         return error(`Unknown symbol ${char}`);
 
       // Do actions depending on the char...
@@ -66,7 +72,7 @@ const Senva = (new (function() {
       // is not character displaying
       let int_buff = parseInt(buff);
 
-      if(buff.length && !isLetter && !'0123456789,'.includes(char) && (Number.isNaN(int_buff) || Math.floor(int_buff) !== parseFloat(buff) || int_buff < 0)) {
+      if(buff.length && !isLetter && !'0123456789_'.includes(char) && (Number.isNaN(int_buff) || Math.floor(int_buff) !== parseFloat(buff) || int_buff < 0)) {
         i -= buff.length;
         return error('Bad value specified');
       }
@@ -87,15 +93,13 @@ const Senva = (new (function() {
           case '7':
           case '8':
           case '9':
-            // Ignore the '0' symbol if the buffer is empty (05 === 5)
-            if(buff.length || char !== '0')
-              buff += char;
+            buff += char;
 
             // If strict mode is enabled, limit the value to 255
             // The second part of the condition checks if the buffer contains at
             // least 3 digits, else it does not perform the parseInt() because
             // this operation costs performances
-            if(strict && buff.length >= 3 && (buff.length >= 4 || parseInt(buff) > 255))
+            if(strict && buff.length >= 3 && parseInt(buff) > 255)
               return error('Too high value, limit is 255 in strict mode');
             break;
 
@@ -114,7 +118,7 @@ const Senva = (new (function() {
           case '+':
             mem[m] += parseInt(buff) || 1;
 
-            if(mem[m] > 255)
+            if(strict && mem[m] > 255)
               mem[m] -= Math.floor(mem[m] / 256) * 256;
 
             buff = '';
@@ -124,7 +128,7 @@ const Senva = (new (function() {
           case '-':
             mem[m] -= parseInt(buff) || 1;
 
-            if(mem[m] < 0)
+            if(strict && mem[m] < 0)
               mem[m] += (Math.floor(-mem[m] / 256) + 1) * 256
 
             buff = '';
@@ -137,7 +141,7 @@ const Senva = (new (function() {
 
             mem[m] *= parseInt(buff);
 
-            if(mem[m] > 255)
+            if(strict && mem[m] > 255)
               mem[m] -= Math.floor(mem[m] / 256) * 256;
 
             buff = '';
@@ -180,9 +184,15 @@ const Senva = (new (function() {
 
             break;
 
-          // Go to the first memory
+          // Go to a given memory adress
           case '\'':
-            m = 0;
+            // If there is no buffer...
+            if(!buff.length)
+              // Go to the first memory adress
+              m = 0;
+            else
+              // Go to the given memory adress
+              m = parseInt(buff);
             break;
 
           // Go to the last memory
@@ -190,14 +200,17 @@ const Senva = (new (function() {
             m = mem.length - 1;
             break;
 
-          // Input a number and place it into the buffer
+          // Ask the user for a number and place it into the buffer
           case '#':
             // If the 'prompt' fonction is not found...
             if(typeof prompt !== 'function')
               return error('Can\'t prompt a value to the user.');
 
-            // Prompt the value
+            // Ask for the value
+            // The first and third line permit to ignore the time passed for the input to don't exceed the timeout
+            prompt_start = window.performance.now();
             buff = prompt('Please input an integer.' + (strict ? '\nStrict mode is enabled, limit is 255.' : ''), '0');
+            started += (window.performance.now() - prompt_start);
 
             // If the value is incorrect...
             let num = parseInt(buff);
@@ -211,27 +224,32 @@ const Senva = (new (function() {
           case '!':
           // Loop
           case ';':
+          case ',':
             // If the buffer is empty...
             if(!buff.length)
-              error('Missing number to compare');
+              return error('Missing number to check the condition');
 
             // Set the condition's state (true or false)
             /** @type {boolean} */
             let cond = (mem[m] === parseInt(buff));
 
             // If asked, invert the condition
-            if(char === '!')
+            if(char === '!' || char === ',')
               cond = !cond;
 
             // If the condition is true...
             if(cond)
               // Just indicates that a condition is opened
-              opened.push(char === ';' ? [i, buff] : [i]);
+              opened.push((char === ';' || char === ',') ? [i, buff] : [i]);
             else { // If the condition is false...
               // Ignore the condition
               let opened = 1;
 
               while(opened) {
+                // If we reached the end of the script, no end was found. Then...
+                if(i === script.length)
+                  return error('No end specified for condition');
+
                 i += 1;
 
                 if(script[i] === '?' || script[i] === '!' || script[i] === ';')
@@ -239,10 +257,6 @@ const Senva = (new (function() {
                 else if(script[i] === '$')
                   opened -= 1;
               }
-
-              // If no end was found
-              if(script[i] !== '$')
-                return error('No end specified for condition');
             }
 
             break;
@@ -264,10 +278,10 @@ const Senva = (new (function() {
             break;
 
           // Get the memory index
-          case '^':
+          case '@':
             mem[m] = m;
 
-            while(mem[m] > 255)
+            while(strict && mem[m] > 255)
               mem[m] -= Math.floor(mem[m] / 256) * 256;
 
             break;
@@ -289,7 +303,7 @@ const Senva = (new (function() {
             break;
 
           // Convert a character to its code
-          case ',':
+          case '_':
             // If the buffer is not one-char long
             if(buff.length !== 1)
               return error('Value must be 1 character long');
@@ -325,6 +339,32 @@ const Senva = (new (function() {
             // Store the random-generated number into the memory
             mem[m] = Math.floor(Math.random() * (parseInt(buff) + 1));
             break;
+
+          // Ask the user for a string and store it into the memory
+          case '(':
+            // If the 'prompt' fonction is not found...
+            if(typeof prompt !== 'function')
+              return error('Can\'t prompt a value to the user.');
+
+            // Ask for the string
+            // The first and third line permit to ignore the time passed for the input to don't exceed the timeout
+            prompt_start = window.performance.now();
+            buff = prompt('Please input a value');
+            started += (window.performance.now() - prompt_start);
+
+            while(mem.length < m + buff.length)
+              mem.push(0);
+
+            // For each char in the string...
+            for(let i = 0; i < buff.length; i++) {
+              mem[m + i] = buff.charCodeAt(i);
+
+              // Check if the code does not exceed the limit in strict mode
+              if(strict && mem[m + i] > 255)
+                return error(`During input : ASCII code for character ${i + 1} is ${mem[m + i]}, exceeding the strict mode\'s number ranges [0..255]`);
+            }
+
+            break;
         }
 
         // If the character is not a digit, and not the condition/loop closing
@@ -351,8 +391,6 @@ const Senva = (new (function() {
       content: display,
       trash  : { memory: mem }
     }
-
-    // TODO: In an array put the position of all opening conditions / loops, if at the end opened !== 0 then make an error at the opening loop / condition
   };
 
 })());

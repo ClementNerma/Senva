@@ -44,20 +44,22 @@ Operation  | Default * | Description
     .      |     /     | Assign a number to the cell
     <      |     -     | Point to the previous cell
     \>     |     -     | Point to the next cell
-    '      |     -     | Point to the first cell
+    '      |     0     | Point to a given cell
     \`     |     -     | Point to the last cell
     #      |     -     | Ask the user for a number (integer between 0 and 255)
     ?      |     /     | Condition
     !      |     /     | Inverted condition
     ;      |     /     | Loop
+    ,      |     /     | Inverted loop
     $      |     -     | End of a condition/Loop
-    ^      |     -     | Store the pointer into the cell
+    @      |     -     | Store the pointer into the cell
     :      |     -     | Display the cell as a number
-    ,      |     /     | Convert the string in the buffer to ASCII code
+    _      |     /     | Convert the string in the buffer to ASCII code
     ~      |     -     | Display the cell as a string (ASCII code)
     =      |     -     | Reset the memory
     &      |     0     | Assign a number to the entire memory
     %      |    255    | Generate a random number between 0 and the value
+    (      |     -     | Ask the user for a string, which will be stored into the memory
 
 **NOTE :** If the default value is '/' that means you need to specify a buffer, '-' means that no buffer is needed. The default value is the value taken if you DO NOT specify a buffer.
 
@@ -96,10 +98,21 @@ Here we made a loop which runs a code while the cell 0 is equal to 5. Next we in
 To display the space ' ' character, we used its ASCII code, but you can also put the character and convert it as a code, then display it. Example :
 
 ```Senva
-A,~
+A_~
 ```
 
 'A' is stored into the buffer, then the buffer is converted to an ASCII code and stored into the current cell (code is 65), then the cell is displayed as an ASCII character.
+
+# Micro-programs
+
+Here are a list of micro-programs that can help you while making Senva code :
+
+`\`>^`
+Get the number of cells into the memory and store it into a new cell (at the end).
+
+`0,~>$`
+Display a string until encounter a zero.
+Example of use : `('0,~>$` (input and display a string)
 
 # License
 

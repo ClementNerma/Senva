@@ -32,7 +32,7 @@ editor.on('change', function(codemirror, change) {
   if(localStorageSupport)
     localStorage.setItem('__Senva_autosave', editor.getValue());
 
-  let output = Senva.exec(code, true);
+  let output = Senva.exec(code, true, 1000);
   $('#result').css('border-color', output.failed ? 'red' : 'lightgray');
   result.setValue(output.content);
 });
