@@ -13,6 +13,8 @@ Here is an example :
 
 Simply download the GitHub repository archive and run the **index.html** page. Put your code on the left editor, the right one will display your program's output or the errors.
 
+You can also test the interpreter at this adress : [https://clementnerma.github.io/Senva/](https://clementnerma.github.io/Senva/)
+
 # The language itself
 
 Senva is made around operations. Each operation can be done by using a *symbol*. For example, the symbol for the addition operation is '+'. To divide, use '/'.
