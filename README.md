@@ -149,9 +149,9 @@ Here are some demonstration programs to make you understanding better the Senva 
 
 ```Senva
 // Algorithm for standard mode (never ends)
-0.>1.>0;{0.}<<{+}>{+}>{v}:${32.~}>$
+0.>1.>0;{0.}<<{+}>{+}>{v}:{10.~}>$
 // Algorithm for strict mode
-0.>1.>0;{0.}<<{+}>{+}>{v}:{32.~}233?|$>$
+0.>1.>0;{0.}<<{+}>{+}>{v}:{10.~}233?|$>$
 ```
 
 Let's decrypt !
@@ -168,8 +168,8 @@ Let's decrypt !
   >    // Go to the current cell (which contains 0)
   {v}  // Paste the addition. Now this cell contains the addition of the two previous terms
   :    // Display it
-  {32.~} // Display a space. To do NOT modify the current cell, we put the
-         // '32' value into the back-memory for displaying
+  {10.~} // Display a new line. To do NOT modify the current cell, we put the
+         // '10' value into the back-memory for displaying
 
   // For strict mode
   233? // Condition : if the cell is equals to 233

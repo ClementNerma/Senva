@@ -29,7 +29,7 @@ const Senva = (new (function() {
       // Return the error
       return {
         failed : true,
-        content: `ERROR : At column ${i + 1} : \n\n${part}\n${' '.repeat(cursor)}^\n${' '.repeat(cursor)}${message}`
+        content: `ERROR : At column ${i + 1} : \n\n${part}\n${' '.repeat(cursor)}^\n${' '.repeat(cursor)}${message}\n\nProgram\'s output before error :\n\n${display}`
       };
     }
 
@@ -304,7 +304,7 @@ const Senva = (new (function() {
           // Display the memory as a string
           case '~':
             // If the character is not printable...
-            if(!String.fromCharCode(mem[m]).match(/[!"#\$%&'\(\)\*\+,\-\.\/a-zA-Z0-9:;<=>\?@\[\]\^_`\{\|\}~ ]/))
+            if(!String.fromCharCode(mem[m]).match(/[!"#\$%&'\(\)\*\+,\-\.\/a-zA-Z0-9:;<=>\?@\[\]\^_`\{\|\}\n~ ]/))
               return error(`${mem[m]} is not a printable character code`);
 
             // Add the character to the output
@@ -404,13 +404,13 @@ const Senva = (new (function() {
               else if(op === '+') { // Add the current memory
                 mem[-1] += mem[m];
 
-                if(strict && mem[m] > 255)
-                  mem[m] -= Math.floor(mem[m] / 256) * 256;
+                if(strict && mem[-1] > 255)
+                  mem[-1] -= Math.floor(mem[-1] / 256) * 256;
               } else if(op === '-') { // Substract the current memory
                 mem[-1] -= mem[m];
 
-                if(strict && mem[m] < 0)
-                  mem[m] += (Math.floor(-mem[m] / 256) + 1) * 256
+                if(strict && mem[-1] < 0)
+                  mem[-1] += (Math.floor(-mem[-1] / 256) + 1) * 256
               } else if(op === '@') // Store the pointer
                 mem[-1] = m;
               else { // Consider it as an operation group on the back-memory
