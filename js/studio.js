@@ -35,7 +35,6 @@ editor.on('change', function(codemirror, change) {
   let output = Senva.exec(code, true);
   $('#result').css('border-color', output.failed ? 'red' : 'lightgray');
   result.setValue(output.content);
-  console.log(output.failed ? 'no memory' : output.trash.memory);
 });
 
 if(localStorageSupport && (autoSaved = localStorage.getItem('__Senva_autosave'))) {
