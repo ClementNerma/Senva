@@ -263,7 +263,7 @@ const Senva = (new (function() {
 
                 i += 1;
 
-                if(script[i] === '?' || script[i] === '!' || script[i] === ';')
+                if(script[i] === '?' || script[i] === '!' || script[i] === ';' || script[i] === ',')
                   got += 1;
                 else if(script[i] === '$')
                   got -= 1;
