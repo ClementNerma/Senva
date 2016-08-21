@@ -478,8 +478,6 @@ const Senva = (new (function() {
       return error((opened[opened.length - 1].length > 1 ? 'Loop' : 'Condition') + ' not closed');
     }
 
-    console.log(mem);
-
     // Return the output
     return {
       failed : false,

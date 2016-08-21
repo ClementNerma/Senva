@@ -60,6 +60,7 @@ Operation  | Default * | Description
     &      |     0     | Assign a number to the entire memory
     %      |    255    | Generate a random number between 0 and the value
     (      |     -     | Ask the user for a string, which will be stored into the memory
+    "      |     /     | Go to the memory adress pointed by the current cell
 
 **NOTE :** If the default value is '/' that means you need to specify a buffer, '-' means that no buffer is needed. The default value is the value taken if you DO NOT specify a buffer.
 
@@ -136,6 +137,7 @@ Symbol | Description
    +   | Add the current cell to the *BM*
    -   | Substract the current cell to the *BM*
    @   | Store the pointer to the *BM*
+   '   | Go to the adress stored in the *BM*
 
 Any other symbol will be considered as a standard operation. But be careful, if you just want to increase the back-memory, don't write `{+}` ! It will add the current cell's value instead of 1. You must write `{1+}`.
 
