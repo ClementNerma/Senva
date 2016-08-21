@@ -29,7 +29,7 @@ const Senva = (new (function() {
       // Return the error
       return {
         failed : true,
-        content: `ERROR : At column ${i + 1} : \n\n${part}\n${' '.repeat(cursor)}^\n${' '.repeat(cursor)}${message}\n\nProgram\'s output before error :\n\n${display}`
+        content: `ERROR : At column ${i + 1} : \n\n${part}\n${' '.repeat(cursor)}^\n${' '.repeat(cursor)}${message}\n\nProgram\'s output before error :\n\n${display}\n\nMemory ${JSON.stringify(mem, null, 4)}\n\nBack-memory : ${mem[-1]}`
       };
     }
 
@@ -72,7 +72,7 @@ const Senva = (new (function() {
       let isLetter /* is the character a letter ? */;
 
       // If the character is not a known symbol
-      if(!".+-*/<>'`#?!;$:,~0123456789=&%_()@{}|".includes(char) && !(isLetter = char.match(/[a-zA-Z ]/)))
+      if(!".+-*/<>'`#?!;$:,~0123456789=&%_()@{}|\"".includes(char) && !(isLetter = char.match(/[a-zA-Z ]/)))
         return error(`Unknown symbol ${char}`);
 
       // Do actions depending on the char...
@@ -221,6 +221,7 @@ const Senva = (new (function() {
             // The first and third line permit to ignore the time passed for the input to don't exceed the timeout
             prompt_start = window.performance.now();
             buff = prompt('Please input an integer.' + (strict ? '\nStrict mode is enabled, limit is 255.' : ''), '0');
+            if(buff === null) return error('User canceled the input');
             started += (window.performance.now() - prompt_start);
 
             // If the value is incorrect...
@@ -365,6 +366,7 @@ const Senva = (new (function() {
             // The first and third line permit to ignore the time passed for the input to don't exceed the timeout
             prompt_start = window.performance.now();
             buff = prompt('Please input a value');
+            if(buff === null) return error('User canceled the input');
             started += (window.performance.now() - prompt_start);
 
             while(mem.length < m + buff.length)
@@ -413,7 +415,9 @@ const Senva = (new (function() {
                   mem[-1] += (Math.floor(-mem[-1] / 256) + 1) * 256
               } else if(op === '@') // Store the pointer
                 mem[-1] = m;
-              else { // Consider it as an operation group on the back-memory
+              else if(op === '\'') { // Go to the pointed adress
+                m = mem[-1];
+              } else { // Consider it as an operation group on the back-memory
                 // Backup the pointer
                 backmem.push(m);
                 // Set the pointer on the back-memory's adress
@@ -447,6 +451,11 @@ const Senva = (new (function() {
           case '|':
             i = script.length;
             break;
+
+          // Go the adress pointed by the cell
+          case '"':
+            m = mem[m] < 0 ? 0 : mem[m];
+            break;
         }
 
         // If the character is not a digit, and not the condition/loop closing
@@ -468,6 +477,8 @@ const Senva = (new (function() {
       i = opened[opened.length - 1][0];
       return error((opened[opened.length - 1].length > 1 ? 'Loop' : 'Condition') + ' not closed');
     }
+
+    console.log(mem);
 
     // Return the output
     return {
