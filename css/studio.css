@@ -13,3 +13,8 @@ body {
   font-size: 13px;
   font-style: italic;
 }
+
+#options {
+  margin-top: 10px;
+  font-size: 14px;
+}

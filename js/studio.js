@@ -1,17 +1,15 @@
 
 "use strict";
 
-function filesClickEvent() {
-  $('#files div.file').click(function() {
-    let fileName = $(this).text();
+function build(codemirror, change) {
+  let code = codemirror.getValue();
 
-    if(fileName === currentFile)
-      return ;
+  if(localStorageSupport)
+    localStorage.setItem('__Senva_autosave', editor.getValue());
 
-    files[currentFile] = editor.getValue();
-    currentFile        = fileName;
-    editor.setValue(files[currentFile]);
-  });
+  let output = Senva.exec(code, document.getElementById('strictMode').checked, document.getElementById('longTimeout').checked ? 10000 : 1000, document.getElementById('disableBackMemory').checked);
+  $('#result').css('border-color', output.failed ? 'red' : 'lightgray');
+  result.setValue(output.content);
 }
 
 let localStorageSupport = (typeof localStorage !== 'undefined'),
@@ -26,22 +24,14 @@ let codeMirrorConfig = {
 let editor = CodeMirror($('#editor').get(0), codeMirrorConfig);
 let result = CodeMirror($('#result').get(0), codeMirrorConfig);
 
-editor.on('change', function(codemirror, change) {
-  let code = codemirror.getValue();
+editor.on('change', build);
 
-  if(localStorageSupport)
-    localStorage.setItem('__Senva_autosave', editor.getValue());
-
-  let output = Senva.exec(code, true, 1000);
-  $('#result').css('border-color', output.failed ? 'red' : 'lightgray');
-  result.setValue(output.content);
-});
-
-if(localStorageSupport && (autoSaved = localStorage.getItem('__Senva_autosave'))) {
-  let conf;
-
+if(localStorageSupport && (autoSaved = localStorage.getItem('__Senva_autosave')))
   editor.setValue(autoSaved);
-  console.info('Auto-saved content has been restored.');
-}
 
 editor.focus();
+
+let checkboxes = document.querySelectorAll('input[type="checkbox"]');
+
+for(let i = 0; i < checkboxes.length; i++)
+  checkboxes[i].addEventListener('change', () => { build(editor); });

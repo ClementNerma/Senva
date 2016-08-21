@@ -12,8 +12,9 @@ const Senva = (new (function() {
     * @param {string} script
     * @param {boolean} [strict] Enable to strict mode
     * @param {number} [timeout] Give a timeout to prevent infinite loops
+    * @param {boolean} [disableBackMemory] Disable the back-memory
     */
-  this.exec = (script, strict = false, timeout = 5000) => {
+  this.exec = (script, strict = false, timeout = 5000, disableBackMemory = false) => {
     /**
       * Display an error
       * @param {string} message
@@ -39,7 +40,9 @@ const Senva = (new (function() {
         display, // The output data
         m      , // The memory index
         opened , // The number of opened conditions/loops
-        started; // The start hour
+        started, // The start hour
+        backmem, // The backuped pointers
+        char   ; // The current charracter
 
     // The moment when the prompt started
     // This variable permit to don't take the time passed during the input in
@@ -49,11 +52,15 @@ const Senva = (new (function() {
 
     // Initialize the memory
     mem     = [0];
+    // Initialize the back-memory
+    mem[-1] = 0 ;
+    // Initialize the other local variables
     m       = 0 ;
     display = '';
     buff    = '';
     opened  = [];
     started = window.performance.now();
+    backmem = [];
 
     // Remove all comments, tabulations and empty lines
     script = script.replace(/\/\/(.*)$/gm, '').replace(/\r\n|\r|\n|\t| /g, '');
@@ -61,10 +68,11 @@ const Senva = (new (function() {
     // For each character in the script...
     for(i = 0; i < script.length; i++) {
       // The current character
-      let char = script[i], isLetter /* is the character a letter ? */;
+      char = script[i];
+      let isLetter /* is the character a letter ? */;
 
       // If the character is not a known symbol
-      if(!".+-*/<>'`#?!;$:,~0123456789=&%_()@".includes(char) && !(isLetter = char.match(/[a-zA-Z ]/)))
+      if(!".+-*/<>'`#?!;$:,~0123456789=&%_()@{}|".includes(char) && !(isLetter = char.match(/[a-zA-Z ]/)))
         return error(`Unknown symbol ${char}`);
 
       // Do actions depending on the char...
@@ -162,13 +170,16 @@ const Senva = (new (function() {
           // Go to the previous memory
           case '<':
             // If strict mode is enabled, going to the -1 memory is not allowed
-            if(strict && m === 0)
+            if(strict && m < 0)
               return error('Can\'t go before the memory index 0 in strict mode');
 
             // If the current pointer is not 0...
-            if(m !== 0)
+            if(m > 0)
               // Decrease the memory pointer
               m -= 1;
+            else if(m === -1) // If the pointer was on the back-memory...
+              // Reset the memory pointer
+              m = 0;
 
             break;
 
@@ -243,9 +254,9 @@ const Senva = (new (function() {
               opened.push((char === ';' || char === ',') ? [i, buff] : [i]);
             else { // If the condition is false...
               // Ignore the condition
-              let opened = 1;
+              let got = 1;
 
-              while(opened) {
+              while(got) {
                 // If we reached the end of the script, no end was found. Then...
                 if(i === script.length)
                   return error('No end specified for condition');
@@ -253,9 +264,9 @@ const Senva = (new (function() {
                 i += 1;
 
                 if(script[i] === '?' || script[i] === '!' || script[i] === ';')
-                  opened += 1;
+                  got += 1;
                 else if(script[i] === '$')
-                  opened -= 1;
+                  got -= 1;
               }
             }
 
@@ -279,6 +290,10 @@ const Senva = (new (function() {
 
           // Get the memory index
           case '@':
+            // If the pointer is into the back-memory...
+            if(m === -1)
+              return error('Can\'t get the back-memory\'s pointer');
+
             mem[m] = m;
 
             while(strict && mem[m] > 255)
@@ -365,6 +380,73 @@ const Senva = (new (function() {
             }
 
             break;
+
+          // Operation on the back-memory
+          case '{':
+            // If back-memory was disabled...
+            if(disableBackMemory)
+              return error('Back-memory was disabled in this context');
+
+            // If syntax is like '{v}'...
+            if(script[i + 2] === '}') {
+              // Consider it as a single command
+              // If the command is unknown, then it will be considered as an
+              // operation group on the back-memory
+
+              // Get the operation...
+              let op = script[i + 1];
+
+              // Perform it !
+              if(op === '^') // Store the memory's value
+                mem[-1] = mem[m];
+              else if(op === 'v') // Restore the back-memory to the current memory
+                mem[m] = mem[-1];
+              else if(op === '+') { // Add the current memory
+                mem[-1] += mem[m];
+
+                if(strict && mem[m] > 255)
+                  mem[m] -= Math.floor(mem[m] / 256) * 256;
+              } else if(op === '-') { // Substract the current memory
+                mem[-1] -= mem[m];
+
+                if(strict && mem[m] < 0)
+                  mem[m] += (Math.floor(-mem[m] / 256) + 1) * 256
+              } else if(op === '@') // Store the pointer
+                mem[-1] = m;
+              else { // Consider it as an operation group on the back-memory
+                // Backup the pointer
+                backmem.push(m);
+                // Set the pointer on the back-memory's adress
+                m = -1;
+              }
+
+              // If it's a single operation, ignore the command
+              if(m !== -1)
+                i += 2;
+            } else {
+              // Consider it as an operation group on the back-memory
+              // Backup the pointer
+              backmem.push(m);
+              // Set the pointer on the back-memory's adress
+              m = -1;
+            }
+
+            break;
+
+          // Close operations on the back-memory
+          case '}':
+            // If no back-memory operation was opened...
+            if(!backmem.length)
+              error('No back-memory operations group opened');
+
+            // Restore the pointer
+            m = backmem.pop();
+            break;
+
+          // Stop the script
+          case '|':
+            i = script.length;
+            break;
         }
 
         // If the character is not a digit, and not the condition/loop closing
@@ -380,7 +462,9 @@ const Senva = (new (function() {
     }
 
     // If a condition/loop was not closed...
-    if(opened.length) {
+    // NOTE: If the program stopped by itself, the opened loops/conditions
+    //       are not closed, ignore this case.
+    if(opened.length && char !== '|') {
       i = opened[opened.length - 1][0];
       return error((opened[opened.length - 1].length > 1 ? 'Loop' : 'Condition') + ' not closed');
     }

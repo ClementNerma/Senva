@@ -41,7 +41,7 @@ Operation  | Default * | Description
     -      |     1     | Substract a value to the cell (if there is no buffer, substract 1)
     *      |     /     | Multiply the cell by a value
     /      |     /     | Divide the cell by a value
-    .      |     /     | Assign a number to the cell
+    .      |     0     | Assign a number to the cell
     <      |     -     | Point to the previous cell
     \>     |     -     | Point to the next cell
     '      |     0     | Point to a given cell
@@ -103,14 +103,98 @@ A_~
 
 'A' is stored into the buffer, then the buffer is converted to an ASCII code and stored into the current cell (code is 65), then the cell is displayed as an ASCII character.
 
+# Strict mode
+
+The strict mode disallow numbers higher than 255. When you try to run this code : `256+` an error will be thrown.
+Negative numbers are not allowed in strict mode.
+
+When you run this code : `255+3+` the value of the cell will be 2, because when it exceeds 255, the cell comes to 0 for the operations. So `255+255+2+` will assign '2' to the cell.
+Negative numbers are not supported, so when a cell is lower than 0, it comes to 255 and substract the rest of the value : `0.3-` will assign 253.
+
+When you try to set the pointer under 0 in strict mode, an error will be thrown, in standard mode it will just set the pointer to the first cell (number 0).
+
+The number inputs are limited to 255, else it will throw an error.
+
+# Back-memory
+
+Senva implements a feature that solves a big problem of the language. Imagine you are making a Fibonacci suite program, you will have to add the two previous terms. How will you do ? You can't add a value from a cell to another, that's impossible.
+
+To do that, you will need to use the *back-memory*. It's a cell, like any other, but its adress is not 2 or 5, but -1. An adress impossible to reach. The back-memory is useful because you can perform any operation you perform on other cells, but without modifying the current adress. Here is an example :
+
+```Senva
+@:   // Display the current adress, says '0'
+{1+} // Add 1 to the back-memory
+@:   // Says '0'
+```
+
+You see ? This permit to manipulate values even if you can't jump to another cell. The operations performed on the back-memory must be between the symbols '{' and '}'. Back-memory also supports some "special" operations (* here *BM* means *Back-Memory*) :
+
+Symbol | Description
+-------|------------
+   ^   | Store the current cell into the *BM*
+   v   | Store the *BM* into the current cell
+   +   | Add the current cell to the *BM*
+   -   | Substract the current cell to the *BM*
+   @   | Store the pointer to the *BM*
+
+Any other symbol will be considered as a standard operation. But be careful, if you just want to increase the back-memory, don't write `{+}` ! It will add the current cell's value instead of 1. You must write `{1+}`.
+
+You will see the full utility of this feature on the Fibonacci program.
+
+# Programs
+
+Here are some demonstration programs to make you understanding better the Senva language.
+
+## Fibonacci suite
+
+```Senva
+// Algorithm for standard mode (never ends)
+0.>1.>0;{0.}<<{+}>{+}>{v}:${32.~}>$
+// Algorithm for strict mode
+0.>1.>0;{0.}<<{+}>{+}>{v}:{32.~}233?|$>$
+```
+
+Let's decrypt !
+
+```Senva
+0.> // Store the first  term, 0, and go the next cell
+1.> // Store the second term, 1, and go the next cell
+0;  // While this cell contains 0 (no ending, we always pass to the next before looping)
+  {0.} // Reset the back-memory
+  <<   // Go to the -2 term
+  {+}  // Add it to the back-memory
+  >    // Go to the -1 term (previous term)
+  {+}  // Add it to the back-memory
+  >    // Go to the current cell (which contains 0)
+  {v}  // Paste the addition. Now this cell contains the addition of the two previous terms
+  :    // Display it
+  {32.~} // Display a space. To do NOT modify the current cell, we put the
+         // '32' value into the back-memory for displaying
+
+  // For strict mode
+  233? // Condition : if the cell is equals to 233
+       // This condition is needed because when we put a higher number than 255,
+       // the cell is reset to 0, so the next numbers will be wrong.
+    |  // Stop the program
+  $ // End of the condition
+  // ===============
+
+  > // Go to the next cell (which is empty). The loop's condition will be true because the cell contains 0.
+$ // End of the loop
+```
+
 # Micro-programs
 
 Here are a list of micro-programs that can help you while making Senva code :
 
-`\`>^`
+```Senva
+\`>^
+```
 Get the number of cells into the memory and store it into a new cell (at the end).
 
-`0,~>$`
+```Senva
+0,~>$
+```
 Display a string until encounter a zero.
 Example of use : `('0,~>$` (input and display a string)
 
