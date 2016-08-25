@@ -7,7 +7,7 @@ function build(codemirror, change) {
   if(localStorageSupport)
     localStorage.setItem('__Senva_autosave', editor.getValue());
 
-  let output = Senva.exec(code, document.getElementById('strictMode').checked, document.getElementById('longTimeout').checked ? 10000 : 1000, document.getElementById('disableBackMemory').checked);
+  let output = Senva.exec(code, document.getElementById('strictMode').checked, document.getElementById('longTimeout').checked ? 10000 : 1000, document.getElementById('disableBackMemory').checked, true);
   $('#result').css('border-color', output.failed ? 'red' : 'lightgray');
   result.setValue(output.content);
 }

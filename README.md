@@ -11,9 +11,23 @@ Here is an example :
 
 # Installation
 
+## Method 1 : Web Interpreter
+
 Simply download the GitHub repository archive and run the **index.html** page. Put your code on the left editor, the right one will display your program's output or the errors.
 
 You can also test the interpreter at this adress : [https://clementnerma.github.io/Senva/](https://clementnerma.github.io/Senva/)
+
+## Method 2 : Command-line
+
+You can also run a Senva program from the command-line. For that, install [Node.js with NPM](https://nodejs.org). Then, just run :
+
+```bash
+npm install -g senva
+```
+
+**NOTE :** For Linux users, you may have to run this command with **sudo** privileges.
+
+Then, you can use the command-line interface (CLI) to run your programs. If you want to run a code, type `senva "2.>"` (don't forget the quotes), or `senva -f program.snv` to run a program from your hard drive. Also, you can run the `senva` command alone to get an interpreter and type what you want.
 
 # The language itself
 
@@ -190,7 +204,7 @@ $ // End of the loop
 Here are a list of micro-programs that can help you while making Senva code :
 
 ```Senva
-\`>^
+`>@
 ```
 Get the number of cells into the memory and store it into a new cell (at the end).
 

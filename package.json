@@ -1,0 +1,27 @@
+{
+  "name": "senva",
+  "version": "2.0.0",
+  "description": "A programming language for golfers",
+  "main": "lib/bin.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ClementNerma/Senva.git"
+  },
+  "keywords": [
+    "programming",
+    "language",
+    "golf-code"
+  ],
+  "author": "Clément Nerma",
+  "license": "CC-BY-NC-ND-4.0",
+  "bugs": {
+    "url": "https://github.com/ClementNerma/Senva/issues"
+  },
+  "homepage": "https://github.com/ClementNerma/Senva#readme",
+  "dependencies": {
+    "prompt-sync": "latest"
+  }
+}
