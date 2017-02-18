@@ -2,7 +2,10 @@
   "name": "senva",
   "version": "2.0.0",
   "description": "A programming language for golfers",
-  "main": "lib/bin.js",
+  "main": "lib/compiler.js",
+  "bin": {
+    "senva": "lib/bin.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
