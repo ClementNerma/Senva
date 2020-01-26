@@ -49,32 +49,32 @@ This code adds 5 to the memory, then substract 2. The Senva language works with 
 
 Here is the list of the operations :
 
-Operation  | Default * | Description
------------|-----------|-------------
-    +      |     1     | Adds a value to the cell (if there is no buffer, adds 1)
-    -      |     1     | Substract a value to the cell (if there is no buffer, substract 1)
-    *      |     /     | Multiply the cell by a value
-    /      |     /     | Divide the cell by a value
-    .      |     0     | Assign a number to the cell
-    <      |     -     | Point to the previous cell
-    \>     |     -     | Point to the next cell
-    '      |     0     | Point to a given cell
-    \`     |     -     | Point to the last cell
-    #      |     -     | Ask the user for a number (integer between 0 and 255)
-    ?      |     /     | Condition
-    !      |     /     | Inverted condition
-    ;      |     /     | Loop
-    ,      |     /     | Inverted loop
-    $      |     -     | End of a condition/Loop
-    @      |     -     | Store the pointer into the cell
-    :      |     -     | Display the cell as a number
-    _      |     /     | Convert the string in the buffer to ASCII code
-    ~      |     -     | Display the cell as a string (ASCII code)
-    =      |     -     | Reset the memory
-    &      |     0     | Assign a number to the entire memory
-    %      |    255    | Generate a random number between 0 and the value
-    (      |     -     | Ask the user for a string, which will be stored into the memory
-    "      |     /     | Go to the memory adress pointed by the current cell
+| Operation  | Default * | Description
+| -----------|-----------|-------------
+|     +      |     1     | Adds a value to the cell (if there is no buffer, adds 1)
+|     -      |     1     | Substract a value to the cell (if there is no buffer, substract 1)
+|     *      |     /     | Multiply the cell by a value
+|     /      |     /     | Divide the cell by a value
+|     .      |     0     | Assign a number to the cell
+|     <      |     -     | Point to the previous cell
+|     \>     |     -     | Point to the next cell
+|     '      |     0     | Point to a given cell
+|     \`     |     -     | Point to the last cell
+|     #      |     -     | Ask the user for a number (integer between 0 and 255)
+|     ?      |     /     | Condition
+|     !      |     /     | Inverted condition
+|     ;      |     /     | Loop
+|     ,      |     /     | Inverted loop
+|     $      |     -     | End of a condition/Loop
+|     @      |     -     | Store the pointer into the cell
+|     :      |     -     | Display the cell as a number
+|     _      |     /     | Convert the string in the buffer to ASCII code
+|     ~      |     -     | Display the cell as a string (ASCII code)
+|     =      |     -     | Reset the memory
+|     &      |     0     | Assign a number to the entire memory
+|     %      |    255    | Generate a random number between 0 and the value
+|     (      |     -     | Ask the user for a string, which will be stored into the memory
+|     "      |     /     | Go to the memory adress pointed by the current cell
 
 **NOTE :** If the default value is '/' that means you need to specify a buffer, '-' means that no buffer is needed. The default value is the value taken if you DO NOT specify a buffer.
 
